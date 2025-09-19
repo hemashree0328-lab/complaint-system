@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Complaint Registration System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1e1e2e, #2e1e3f);
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1, h2, h3 { color: #ff8aff; }
+    .card {
+      background: rgba(255,255,255,0.1);
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      box-shadow: 0 0 10px #ff8aff;
+    }
+    input, select, textarea, button {
+      width: 90%;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    button { background: #ff8aff; color: white; cursor: pointer; }
+    button:hover { background: #ff4fd8; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ff8aff;
+      padding: 10px;
+    }
+    th { background: rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body>
+  <!-- Login -->
+  <section id="login-section">
+    <h1>Complaint Registration System</h1>
+    <form id="login-form">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p id="login-msg"></p>
+  </section>
+
+  <!-- Dashboard -->
+  <section id="dashboard" style="display:none;">
+    <h2>Dashboard</h2>
+    <p id="welcome"></p>
+
+    <!-- Complaint Form (Students only) -->
+    <div class="card" id="student-form">
+      <h3>Submit Complaint</h3>
+      <form id="complaint-form">
+        <select id="category" required>
+          <option value="maintenance">Maintenance</option>
+          <option value="academics">Academics</option>
+          <option value="harassment">Harassment</option>
+        </select>
+        <select id="priority" required>
+          <option value="urgent">Urgent</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <textarea id="details" rows="4" placeholder="Enter complaint details" required></textarea>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+
+    <!-- Complaint Tracking -->
+    <div class="card">
+      <h3>Complaints</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Category</th>
+            <th>Priority</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="complaint-list"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    // Demo "users" (hardcoded)
+    const users = [
+      { email: "student@example.com", password: "123", role: "student" },
+      { email: "staff@example.com", password: "123", role: "staff" },
+      { email: "admin@example.com", password: "123", role: "admin" }
+    ];
+
+    // Complaints stored in localStorage (like a backend)
+    let complaints = JSON.parse(localStorage.getItem("complaints") || "[]");
+
+    // Handle login
+    document.getElementById("login-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const user = users.find(u => u.email === email && u.password === password);
+      if (user) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        document.getElementById("welcome").innerText = `Welcome, ${user.role}!`;
+
+        if (user.role === "student") {
+          document.getElementById("student-form").style.display = "block";
+        } else {
+          document.getElementById("student-form").style.display = "none";
+        }
+
+        loadComplaints();
+      } else {
+        document.getElementById("login-msg").innerText = "Invalid credentials!";
+      }
+    });
+
+    // Handle complaint submission
+    document.getElementById("complaint-form")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const category = document.getElementById("category").value;
+      const priority = document.getElementById("priority").value;
+      const details = document.getElementById("details").value;
+
+      const newComplaint = {
+        id: complaints.length + 1,
+        category,
+        priority,
+        details,
+        status: "Submitted"
+      };
+      complaints.push(newComplaint);
+      localStorage.setItem("complaints", JSON.stringify(complaints));
+
+      loadComplaints();
+      e.target.reset();
+    });
+
+    // Load complaints
+    function loadComplaints() {
+      const tbody = document.getElementById("complaint-list");
+      tbody.innerHTML = "";
+      complaints.forEach(c => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${c.id}</td>
+            <td>${c.category}</td>
+            <td>${c.priority}</td>
+            <td>${c.status}</td>
+          </tr>`;
+      });
+    }
+  </script>
+</body>
+</html>
